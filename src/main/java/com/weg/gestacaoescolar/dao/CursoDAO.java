@@ -3,7 +3,6 @@ package com.weg.gestacaoescolar.dao;
 import com.weg.gestacaoescolar.conexao.Conexao;
 import com.weg.gestacaoescolar.model.Curso;
 import org.springframework.stereotype.Repository;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

@@ -3,6 +3,7 @@ package com.weg.gestacaoescolar.service;
 import com.weg.gestacaoescolar.dao.ProfessorDAO;
 import com.weg.gestacaoescolar.dto.professor.ProfessorRequisicaoDTO;
 import com.weg.gestacaoescolar.dto.professor.ProfessorRespostaDTO;
+
 import com.weg.gestacaoescolar.mapper.ProfessorMapper;
 import com.weg.gestacaoescolar.model.Professor;
 import org.springframework.stereotype.Service;

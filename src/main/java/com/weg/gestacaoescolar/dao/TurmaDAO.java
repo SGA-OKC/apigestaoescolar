@@ -2,8 +2,9 @@ package com.weg.gestacaoescolar.dao;
 
 import com.weg.gestacaoescolar.conexao.Conexao;
 import com.weg.gestacaoescolar.model.Turma;
+import com.weg.gestacaoescolar.model.TurmaResposta;
+import com.weg.gestacaoescolar.util.gerarIn;
 import org.springframework.stereotype.Repository;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 @Repository
 public class TurmaDAO {
 
-    public Turma salvarCursos(Turma turma) throws SQLException {
+    public Turma salvarTurma(Turma turma) throws SQLException {
         String query = """
                 INSERT INTO 
                 turma
@@ -24,8 +25,8 @@ public class TurmaDAO {
             PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)){
 
             stmt.setString(1, turma.getNome());
-            stmt.setInt(2, turma.getCursoId());
-            stmt.setInt(3, turma.getProfessorId());
+            stmt.setInt(2, turma.getCurso_id());
+            stmt.setInt(3, turma.getProfessor_id());
             stmt.executeUpdate();
 
             ResultSet rs = stmt.getGeneratedKeys();
@@ -64,36 +65,45 @@ public class TurmaDAO {
         return turmas;
     }
 
-    public Turma buscarTurmaPorId(int id) throws SQLException {
+    public TurmaResposta buscarTurmasPorId(int id) throws SQLException {
         String query = """
-                SELECT id
-                      ,nome
-                      ,curso_id
-                      ,professor_id
-                FROM turma
-                WHERE id = ?
-                """;
+                        SELECT t.id
+                        , t.nome
+                        , t.curso_id
+                        , t.professor_id
+                        , p.nome as professor
+                        , c.nome as curso
+                        FROM turma t 
+                        LEFT JOIN professor p 
+                        ON  t.professor_id = p.id
+                        LEFT JOIN curso c
+                        ON c.id = t.curso_id
+                        WHERE t.id = ?
+                        """;
+        TurmaResposta turmaResposta = null;
 
-        int newId = 0;
-        String nome = "";
-        int cursoId = 0;
-        int professorId = 0;
+        try (Connection conn = Conexao.conectar();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
 
-        try(Connection conn = Conexao.conectar();
-            PreparedStatement stmt = conn.prepareStatement(query)){
+            stmt.setInt(1, id);
 
-            stmt.setInt(1,id);
             ResultSet rs = stmt.executeQuery();
 
-            if (rs.next()){
-                newId =rs.getInt("id");
-                nome =rs.getString("nome");
-                cursoId =rs.getInt("curso_id");
-                professorId =rs.getInt("professor_id");
+            if (rs.next()) {
+                int newId = rs.getInt("id");
+                String nome = rs.getString("nome");
+                int cursoId = rs.getInt("curso_id");
+                int professorId = rs.getInt("professor_id");
+                String nomeProfessor = rs.getString("professor");
+                String nomeCurso = rs.getString("curso");
+
+                var turma = new Turma(newId, nome, cursoId, professorId);
+                turmaResposta = new TurmaResposta(turma,nomeProfessor, nomeCurso);
             }
         }
-        return new Turma(newId,nome,cursoId,professorId);
+        return turmaResposta;
     }
+
 
     public void atualizarTurma(int id) throws SQLException {
         String query = "UPDATE turma SET nome = ?, curso_id = ?, professor_id = ? WHERE id = ?";
@@ -139,23 +149,49 @@ public class TurmaDAO {
         return false;
     }
 
-    public boolean turmaExistePorId(int id) throws SQLException {
+    public List<String> buscarListaNomesPorId(List<Integer> idsAlunos) throws SQLException {
         String query = """
-                SELECT id
-                FROM turma
-                WHERE id = ?
-                """;
+                SELECT nome
+                FROM aluno 
+                WHERE id IN """ + gerarIn.gerando(idsAlunos.size());
 
-        try(Connection conn = Conexao.conectar();
-            PreparedStatement stmt = conn.prepareStatement(query)){
 
-            stmt.setInt(1, id);
+        List<String> nomeAlunos = new ArrayList<>();
+
+        try (Connection conn = Conexao.conectar();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            String nome = "";
+
+            for (int i = 0; i < idsAlunos.size(); i++) {
+                stmt.setInt(i + 1, idsAlunos.get(i));
+            }
+
             ResultSet rs = stmt.executeQuery();
 
-            if (rs.next()){
-                return true;
+            while (rs.next()) {
+                nome = rs.getString("nome");
+                nomeAlunos.add(nome);
+            }
+
+        }
+        return nomeAlunos;
+    }
+
+    public void inserirAlunosTurma(int idTurma, List<Integer> idAlunos )throws SQLException{
+        String query = """
+                INSERT INTO turma_aluno
+                (turma_id, aluno_id)
+                VALUES
+                (?,?)
+                """;
+
+        for(Integer idAluno : idAlunos){
+            try(Connection conn = Conexao.conectar();
+                PreparedStatement stmt = conn.prepareStatement(query)){
+                stmt.setInt(1,idTurma);
+                stmt.setInt(2,idAluno);
+                stmt.executeUpdate();
             }
         }
-        return false;
     }
 }
