@@ -2,6 +2,7 @@ package com.weg.gestacaoescolar.dao;
 
 import com.weg.gestacaoescolar.conexao.Conexao;
 import com.weg.gestacaoescolar.model.Curso;
+import com.weg.gestacaoescolar.util.gerarIn;
 import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
@@ -149,5 +150,34 @@ public class CursoDAO {
             }
         }
         return false;
+    }
+    public List<String> listaProfessor(List<Integer> listProfIds) throws SQLException {
+        String query = """
+                SELECT p.nome
+                FROM professor p
+                LEFT JOIN turma t
+                ON p.id = t.professor_id
+                WHERE p.id IN """+ gerarIn.gerando(listProfIds.size());
+
+
+        List<String> nomeProfessores = new ArrayList<>();
+
+        try (Connection conn = Conexao.conectar();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            String nome = "";
+
+            for(int i = 0; i < listProfIds.size(); i++){
+                stmt.setInt(i + 1, listProfIds.get(i));
+            }
+
+            ResultSet rs = stmt.executeQuery();
+
+            while(rs.next()) {
+                nome = rs.getString("nome");
+                nomeProfessores.add(nome);
+            }
+
+        }
+        return nomeProfessores;
     }
 }

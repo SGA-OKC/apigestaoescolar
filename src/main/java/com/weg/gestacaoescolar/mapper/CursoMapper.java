@@ -5,6 +5,8 @@ import com.weg.gestacaoescolar.dto.curso.CursoRespostaDTO;
 import com.weg.gestacaoescolar.model.Curso;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class CursoMapper {
 
@@ -12,8 +14,8 @@ public class CursoMapper {
         return new Curso(requisicaoDTO.nome(), requisicaoDTO.codigo());
     }
 
-    public CursoRespostaDTO paraRespostaDTO(Curso curso) {
-        return new CursoRespostaDTO(curso.getId(), curso.getNome(), curso.getCodigo());
+    public CursoRespostaDTO paraRespostaDTO(Curso curso, List<String> nomesProfessor) {
+        return new CursoRespostaDTO(curso.getId(), curso.getNome(), curso.getCodigo(), nomesProfessor);
     }
 
     public Curso paraUpdate(CursoRequisicaoDTO requisicaoDTO, Curso curso) {

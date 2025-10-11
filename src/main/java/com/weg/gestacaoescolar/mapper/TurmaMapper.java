@@ -22,11 +22,11 @@ public class TurmaMapper {
             turma.setNome(requisicaoDTO.nome());
         }
 
-        if ((requisicaoDTO.professorId() != turma.getProfessorId() && requisicaoDTO.professorId() != 0)) {
-            turma.setProfessorId(requisicaoDTO.professorId());
+        if ((requisicaoDTO.professorId() != turma.getProfessor_id() && requisicaoDTO.professorId() != 0)) {
+            turma.setProfessor_id(requisicaoDTO.professorId());
         }
-        if ((requisicaoDTO.cursoId() != turma.getCursoId() && requisicaoDTO.cursoId() != 0)){
-            turma.setCursoId(requisicaoDTO.cursoId());
+        if ((requisicaoDTO.cursoId() != turma.getCurso_id() && requisicaoDTO.cursoId() != 0)){
+            turma.setCurso_id(requisicaoDTO.cursoId());
         }
         return turma;
     }
