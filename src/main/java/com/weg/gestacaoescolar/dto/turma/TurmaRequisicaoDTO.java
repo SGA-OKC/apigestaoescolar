@@ -9,12 +9,10 @@ import java.util.List;
 public record TurmaRequisicaoDTO(
         @NotBlank(message = "Nome inválido!")
         String nome,
-
         @PositiveOrZero(message = "ID de curso inválido!")
         int cursoId,
         @PositiveOrZero (message = "ID de professor inválido!")
         int professorId,
-
         @NotEmpty(message = "Lista inválida!")
         List<Integer> idsAlunos
 ){
