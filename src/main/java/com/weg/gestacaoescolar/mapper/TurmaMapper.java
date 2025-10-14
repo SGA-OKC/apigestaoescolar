@@ -4,9 +4,10 @@ import com.weg.gestacaoescolar.dto.turma.TurmaRequisicaoDTO;
 import com.weg.gestacaoescolar.dto.turma.TurmaRespostaDTO;
 import com.weg.gestacaoescolar.model.Turma;
 import com.weg.gestacaoescolar.model.TurmaResposta;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
-
+@Component
 public class TurmaMapper {
 
     public Turma paraEntidade(TurmaRequisicaoDTO requisicaoDTO){

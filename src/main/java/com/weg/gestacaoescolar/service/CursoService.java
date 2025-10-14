@@ -37,42 +37,70 @@ public class CursoService {
         return mapper.paraRespostaDTO(newCurso, nomesProf);
     }
 
+    public List<CursoRespostaDTO> listarCursos() throws SQLException {
+        List<Curso> cursos = repository.listarCurso();
+        List<CursoRespostaDTO> respostaDTOS = new ArrayList<>();
 
+        for (Curso curso : cursos){
+            List<Integer> idProfessores = cursoProfessoresMap.getOrDefault(curso.getId(),List.of());
+            List<String> nomeProfessores = new ArrayList<>();
 
-//    public List<CursoRespostaDTO> listarCursos() throws SQLException {
-//        List<Curso> cursos = repository.listarCurso();
-//        List<CursoRespostaDTO> respostaDTOS = new ArrayList<>();
-//
-//        for (Curso curso : cursos){
-//            respostaDTOS.add(mapper.paraRespostaDTO(curso));
-//        }
-//        return respostaDTOS;
-//    }
+            if (!idProfessores.isEmpty()){
+                nomeProfessores = repository.listaProfessor(idProfessores);
+            }
+            respostaDTOS.add(mapper.paraRespostaDTO(curso,nomeProfessores));
+        }
+        return respostaDTOS;
+    }
 
-//    public CursoRespostaDTO pesquisarAlunoPorId(int id) throws SQLException {
-//        Curso curso = repository.buscarCursoPorId(id);
-//
-//        if (curso == null){
-//            throw new RuntimeException("ID não existe!!");
-//        }
-//        return mapper.paraRespostaDTO(curso);
-//    }
-//
-//    public void deletarCurso(int id) throws SQLException {
-//        if (!repository.cursoExistePorId(id)) {
-//            throw new RuntimeException("ID não existe!!");
-//        }
-//        repository.deletarCurso(id);
-//    }
-//
-//    public CursoRespostaDTO atualizarCurso(int id,CursoRequisicaoDTO requisicaoDTO) throws SQLException {
-//        Curso curso = repository.buscarCursoPorId(id);
-//
-//        if (curso.getId() == 0){
-//            throw new RuntimeException("ID não existe!!");
-//        }
-//        Curso newCurso = mapper.paraUpdate(requisicaoDTO,curso);
-//        repository.salvarCurso(newCurso);
-//        return mapper.paraRespostaDTO(newCurso);
-//    }
+    public CursoRespostaDTO pesquisarCursoPorId(int id) throws SQLException {
+        Curso curso = repository.buscarCursoPorId(id);
+        List<Curso> cursos = repository.listarCurso();
+
+        if (curso == null){
+            throw new RuntimeException("ID não existe!!");
+        }
+
+        List<Integer> idProfessor = new ArrayList<>();
+        List<String> nomeProfessor = new ArrayList<>();
+
+        for (Curso c : cursos){
+            if (c.getId() == id){
+                idProfessor = cursoProfessoresMap.getOrDefault(c.getId(),List.of());
+
+                if (idProfessor.isEmpty()){
+                    nomeProfessor = repository.listaProfessor(idProfessor);
+                }
+            }
+        }
+        return mapper.paraRespostaDTO(curso,nomeProfessor);
+    }
+
+    public void deletarCurso(int id) throws SQLException {
+        Curso curso = repository.buscarCursoPorId(id);
+
+        if (curso == null){
+            throw new RuntimeException("ID não existe!!");
+        }
+        repository.deletarCurso(id);
+    }
+
+    public CursoRespostaDTO atualizarCurso(int id,CursoRequisicaoDTO requisicaoDTO) throws SQLException {
+        Curso curso = repository.buscarCursoPorId(id);
+
+        if (curso == null){
+            throw new RuntimeException("ID não existe!!");
+        }
+
+        List<Integer> idProfessores = cursoProfessoresMap.getOrDefault(curso.getId(),List.of());
+        List<String> nomeProfessores = new ArrayList<>();
+
+        if (!idProfessores.isEmpty()){
+            nomeProfessores = repository.listaProfessor(idProfessores);
+        }
+
+        Curso newCurso = mapper.paraUpdate(requisicaoDTO,curso);
+        repository.atualizarCurso(newCurso);
+        return mapper.paraRespostaDTO(newCurso,nomeProfessores);
+    }
 }

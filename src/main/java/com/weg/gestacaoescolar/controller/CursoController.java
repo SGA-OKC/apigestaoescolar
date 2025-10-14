@@ -3,6 +3,7 @@ package com.weg.gestacaoescolar.controller;
 import com.weg.gestacaoescolar.dto.curso.CursoRequisicaoDTO;
 import com.weg.gestacaoescolar.dto.curso.CursoRespostaDTO;
 import com.weg.gestacaoescolar.service.CursoService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,19 @@ public class CursoController {
     public CursoController(CursoService service){
         this.service = service;
     }
-
+    @PostMapping
+    public ResponseEntity<CursoRespostaDTO> criarCurso(
+            @Valid @RequestBody CursoRequisicaoDTO requisicaoDTO
+    ){
+        try{
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(service.criarCurso(requisicaoDTO));
+        } catch (SQLException e){
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .build();
+        }
+    }
     @GetMapping
     public ResponseEntity<List<CursoRespostaDTO>> listarCursos(){
         try{
@@ -37,21 +50,7 @@ public class CursoController {
         ){
         try{
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(service.pesquisarAlunoPorId(id));
-        } catch (SQLException e){
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .build();
-        }
-    }
-
-    @PostMapping
-    public ResponseEntity<CursoRespostaDTO> criarCurso(
-            @RequestBody CursoRequisicaoDTO requisicaoDTO
-        ){
-        try{
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(service.criarCurso(requisicaoDTO));
+                    .body(service.pesquisarCursoPorId(id));
         } catch (SQLException e){
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -62,7 +61,7 @@ public class CursoController {
     @PutMapping("/{id}")
     public ResponseEntity<CursoRespostaDTO> atualizarCurso(
             @PathVariable int id,
-            @RequestBody CursoRequisicaoDTO requisicaoDTO
+            @Valid @RequestBody CursoRequisicaoDTO requisicaoDTO
         ){
         try{
             return ResponseEntity.status(HttpStatus.OK)
@@ -73,7 +72,6 @@ public class CursoController {
                     .build();
         }
     }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<CursoRespostaDTO> deletarCurso(
             @PathVariable int id
@@ -87,5 +85,4 @@ public class CursoController {
                     .build();
         }
     }
-
 }

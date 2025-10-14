@@ -105,15 +105,20 @@ public class TurmaDAO {
     }
 
 
-    public void atualizarTurma(int id) throws SQLException {
+    public Turma atualizarTurma(int id, Turma turma) throws SQLException {
         String query = "UPDATE turma SET nome = ?, curso_id = ?, professor_id = ? WHERE id = ?";
 
         try(Connection conn = Conexao.conectar();
             PreparedStatement stmt = conn.prepareStatement(query)){
 
-            stmt.setInt(1, id);
+            stmt.setString(1, turma.getNome());
+            stmt.setInt(2, turma.getCurso_id());
+            stmt.setInt(3, turma.getProfessor_id());
+            stmt.setInt(4, id);
             stmt.executeUpdate();
         }
+
+        return turma;
     }
     public void deletarTurma(int id) throws SQLException {
         String query = "DELETE FROM turma WHERE id = ?";
@@ -193,5 +198,65 @@ public class TurmaDAO {
                 stmt.executeUpdate();
             }
         }
+    }
+
+    public List<String> buscarListaNomeAlunosPorTurma(int idTurma) throws SQLException {
+        String query = """
+                SELECT a.nome
+                FROM turma_aluno t 
+                JOIN aluno a 
+                ON t.aluno_id = a.id
+                WHERE t.turma_id = ?
+                """;
+        List<String> nomeAlunos = new ArrayList<>();
+
+        try(Connection conn = Conexao.conectar();
+            PreparedStatement stmt = conn.prepareStatement(query)){
+            stmt.setInt(1, idTurma);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()){
+                String nome = rs.getString("nome");
+                nomeAlunos.add(nome);
+            }
+        }
+        return nomeAlunos;
+    }
+
+    public List<TurmaResposta> buscarTurmas() throws SQLException {
+        String query = """
+                        SELECT t.id
+                        , t.nome
+                        , t.curso_id
+                        , t.professor_id
+                        , p.nome as professor
+                        , c.nome as curso
+                        FROM turma t 
+                        LEFT JOIN professor p 
+                        ON  t.professor_id = p.id
+                        LEFT JOIN curso c
+                        ON c.id = t.curso_id
+                        """;
+        List<TurmaResposta> turmaRespostas = new ArrayList<>();
+
+        try (Connection conn = Conexao.conectar();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int newId = rs.getInt("id");
+                String nome = rs.getString("nome");
+                int cursoId = rs.getInt("curso_id");
+                int professorId = rs.getInt("professor_id");
+                String nomeProfessor = rs.getString("professor");
+                String nomeCurso = rs.getString("curso");
+
+                var turma = new Turma(newId, nome, cursoId, professorId);
+                var turmaResposta = new TurmaResposta(turma,nomeProfessor, nomeCurso);
+                turmaRespostas.add(turmaResposta);
+            }
+        }
+        return turmaRespostas;
     }
 }

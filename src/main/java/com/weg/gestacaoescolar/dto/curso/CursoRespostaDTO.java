@@ -1,6 +1,5 @@
 package com.weg.gestacaoescolar.dto.curso;
 
-import com.weg.gestacaoescolar.model.Professor;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 
